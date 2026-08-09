@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "14.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "14_files/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/14.html"
+    }
+  ]
+}
