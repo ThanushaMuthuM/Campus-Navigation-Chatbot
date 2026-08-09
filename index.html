@@ -292,7 +292,7 @@ button:disabled {
   </header>
 
   <div class="chat-box" id="chat-box">
-    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I’ll show you the way.</div>
+    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I'll show you the way.</div>
   </div>
 
   <form class="input-area" onsubmit="sendMessage(event)">
@@ -313,7 +313,8 @@ button:disabled {
   });
 
   const bounds = [[0, 0], [imageHeight, imageWidth]];
-  const image = L.imageOverlay('blue.jpg', bounds).addTo(map);
+  // ✅ FIXED: Image path now points to 14_files folder
+  const image = L.imageOverlay('./14_files/blue.jpg', bounds).addTo(map);
   map.fitBounds(bounds);
 
   const locations = {
@@ -467,7 +468,7 @@ function typeBotResponse(text) {
     if (index < text.length) {
       botMessage.textContent += text.charAt(index++);
       chatBox.scrollTop = chatBox.scrollHeight;
-      setTimeout(typeChar, 20); // Typing speed
+      setTimeout(typeChar, 20);
     }
   }
   typeChar();
