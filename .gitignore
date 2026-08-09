@@ -1,0 +1,40 @@
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+
+# Documents
+*.pdf
+*.doc
+*.docx
+*.txt
+
+# Videos
+*.mp4
+*.mov
+*.avi
+
+# Audio
+*.mp3
+*.wav
+
+# Archives
+*.zip
+*.rar
+*.7z
+
+# VS Code
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Environment files
+.env

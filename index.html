@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NPR Navigation Chatbot</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: linear-gradient(to right, #e3f2fd, #fff);
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h2 {
+      color: #007bff;
+      margin: 0;
+    }
+
+    .chat-box {
+      background: #fff;
+      width: 100%;
+      max-width: 600px;
+      height: 250px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-box .bot-message,
+    .chat-box .user-message {
+      margin: 8px 0;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 85%;
+      white-space: pre-line;
+    }
+
+    .bot-message {
+      background: #d9f1ff;
+      align-self: flex-start;
+      color: #005080;
+    }
+    .bot-message.typing::after {
+  content: " ⏳ Thinking...";
+  font-style: italic;
+  opacity: 0.8;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.2; }
+}
+
+
+    .user-message {
+      background: #d1ffd7;
+      align-self: flex-end;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .input-area {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 22px;
+      background: #007bff;
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #map {
+      width: 100%;
+      height: 600px;
+      margin-top: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 600px) {
+  .input-area {
+    flex-direction: column;
+  }
+  input[type="text"], button {
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h2>🤖 NaviGate </h2>
+    <p>Ask something like "canteen to temple" to begin navigation!</p>
+  </header>
+
+  <div class="chat-box" id="chat-box">
+    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I’ll show you the way.</div>
+  </div>
+
+  <form class="input-area" onsubmit="sendMessage(event)">
+    <input type="text" id="user-input" placeholder="Where do you want to go?" required />
+    <button type="submit">Send</button>
+  </form>
+
+  <div id="map"></div>
+</div>
+
+<script>
+  const imageWidth = 788;
+  const imageHeight = 768;
+
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -1
+  });
+
+  const bounds = [[0, 0], [imageHeight, imageWidth]];
+  const image = L.imageOverlay('blue.jpg', bounds).addTo(map);
+  map.fitBounds(bounds);
+
+  const locations = {
+    "volleyballcourt": [350, 540],
+    "nprcet mainblock": [460, 480],
+    "ep lab": [460, 360],
+    "busshed,transportdepartment": [680, 280],
+    "girlshostel": [470, 630],
+    "toilet": [170, 300],
+    "npr artsblock1": [140, 400],
+    "medicalcenter,store,sportsroom": [340, 400],
+    "handballground": [540, 460],
+    "hillblock1": [630, 480],
+    "canteen": [280, 410],
+    "mountain": [620, 380],
+    "hillblock2": [650, 455],
+    "openauditorium": [580, 560],
+    "guesthouse": [560, 710],
+    "mess": [540, 710],
+    "footballfield": [650, 580],
+    "nprcet rearblock": [510, 550],
+    "projectroom": [460, 320],
+    "eplab": [460, 360],
+    "r&d cell": [440, 360],
+    "npr auditoriumblock": [400, 150],
+    "lawn": [420, 630],
+    "lab": [460, 190]
+  };
+
+  // Show clickable points
+  for (const name in locations) {
+    L.circleMarker(locations[name], {
+      radius: 6,
+      color: 'blue',
+      fillColor: 'cyan',
+      fillOpacity: 0.9
+    }).addTo(map).bindPopup(name.toUpperCase());
+  }
+
+  const predefinedRoutes = {
+    "canteen to girlshostel": ["canteen", [510, 620], "girlshostel"],
+    "volleyballcourt to nprcet mainblock": ["volleyballcourt", [400, 520], [430, 500], "nprcet mainblock"],
+    "eplab to busshed,transportdepartment": ["ep lab", [500, 340], [600, 300], "busshed,transportdepartment"],
+    "toilet to npr artsblock1": ["toilet", [150, 340], [140, 370], "npr artsblock1"],
+    "medicalcenter,store,sportsroom to handballground": ["medicalcenter,store,sportsroom", [400, 420], [470, 440], "handballground"],
+    "girlshostel to hillblock1": ["girlshostel", [500, 620], [570, 540], [610, 500], "hillblock1"],
+    "hillblock1 to busshed,transportdepartment": ["hillblock1", [650, 460], [670, 380], "busshed,transportdepartment"],
+    "volleyballcourt to toilet": ["volleyballcourt", [320, 500], [260, 430], [200, 350], "toilet"],
+    "npr artsblock1 to eplab": ["npr artsblock1", [150, 430], [220, 460], [300, 440], [380, 420], [440, 380], "ep lab"],
+    "nprcet mainblock to medicalcenter,store,sportsroom": ["nprcet mainblock", [420, 470], [400, 440], [370, 420], "medicalcenter,store,sportsroom"],
+    "handballground to canteen": ["handballground", [530, 500], [520, 540], "canteen"],
+    "nprcet mainblock to girlshostel": ["nprcet mainblock", [480, 520], [490, 580], [480, 610], "girlshostel"]
+  };
+
+  const routeDescriptions = {
+    "canteen to girlshostel": "Start at the canteen, move down past the NPRCET rear block, and follow the road until you reach the girl's hostel.",
+    "volleyballcourt to nprcet mainblock": "From the volleyball court, head diagonally northeast, follow the curved road, and reach the NPRCET main block.",
+    "eplab to busshed,transportdepartment": "From the EP lab, move right through the internal roads, turn left near the R&D cell, and proceed straight to the bus shed and transport department.",
+    "toilet to npr artsblock1": "Exit the toilet area heading south, curve around the junction, and you'll reach the NPR Arts Block 1.",
+    "medicalcenter,store,sportsroom to handballground": "Start at the medical center/store/sportsroom area, follow the road eastward, and you'll arrive at the handball ground.",
+    "girlshostel to hillblock1": "Leave the girl's hostel heading north, pass through the curved lane, and you'll find Hill Block 1 nearby.",
+    "hillblock1 to busshed,transportdepartment": "From Hill Block 1, take the northeast road, curve around the mountain path, and head directly to the bus shed and transport department.",
+    "volleyballcourt to toilet": "From the volleyball court, take the southern curved road past the inner campus, and follow signs to the toilet area.",
+    "npr artsblock1 to eplab": "Start at NPR Arts Block 1, follow the curved path northeast, passing the sportsroom, and continue to the EP lab.",
+    "nprcet mainblock to medicalcenter,store,sportsroom": "Leave the main block heading south, curve left at the junction, and you'll reach the medical center, store, and sports room.",
+    "handballground to canteen": "From the handball ground, go down along the right path, pass the open space, and arrive at the canteen.",
+    "nprcet mainblock to girlshostel": "Exit the main block heading south, follow the winding path, and reach the girl's hostel through the rear block."
+  };
+
+  let lastRoute = null;
+
+  function normalize(text) {
+    return text.toLowerCase().replace(/\s+/g, '');
+  }
+
+  function sendMessage(event) {
+  event.preventDefault();
+  const input = document.getElementById("user-input");
+  const chatBox = document.getElementById("chat-box");
+  const userText = input.value.trim();
+
+  if (!userText) return;
+
+  // User Message
+  const userMessage = document.createElement("div");
+  userMessage.className = "user-message";
+  userMessage.textContent = userText;
+  chatBox.appendChild(userMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Bot Typing Indicator
+  const typingMessage = document.createElement("div");
+  typingMessage.className = "bot-message typing";
+  typingMessage.id = "typing-indicator";
+  typingMessage.textContent = "Typing...";
+  chatBox.appendChild(typingMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  input.value = "";
+
+  // Simulate bot thinking
+  setTimeout(() => {
+    typingMessage.remove();
+
+    const normalizedInput = normalize(userText);
+    let match = null;
+    for (const key in predefinedRoutes) {
+      if (normalizedInput.includes(normalize(key))) {
+        match = key;
+        break;
+      }
+    }
+
+    let botReplyText = "Sorry, I couldn't find that route.";
+    if (match) {
+      const route = predefinedRoutes[match];
+      const coords = route.map(point => typeof point === "string" ? locations[point] : point);
+      drawRouteVia(coords);
+      const routeDescription = routeDescriptions[match] || "Follow the red dashed path.";
+      botReplyText = `From ${route[0].toUpperCase()} to ${route.at(-1).toUpperCase()}: follow the red dashed path.\nRoute Description: ${routeDescription}`;
+    }
+
+    typeBotResponse(botReplyText);
+  }, 1000);
+}
+
+
+  function drawRouteVia(points) {
+    if (lastRoute) map.removeLayer(lastRoute);
+    lastRoute = L.polyline(points, {
+      color: 'red',
+      weight: 4,
+      dashArray: '8, 6'
+    }).addTo(map);
+  }
+
+  map.on('click', function (e) {
+    alert(`Clicked at: [${Math.floor(e.latlng.lat)}, ${Math.floor(e.latlng.lng)}]`);
+  });
+
+
+function typeBotResponse(text) {
+  const chatBox = document.getElementById("chat-box");
+  const botMessage = document.createElement("div");
+  botMessage.className = "bot-message";
+  chatBox.appendChild(botMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  let index = 0;
+  function typeChar() {
+    if (index < text.length) {
+      botMessage.textContent += text.charAt(index++);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(typeChar, 20); // Typing speed
+    }
+  }
+  typeChar();
+}
+
+  
+</script>
+</body>
+</html>

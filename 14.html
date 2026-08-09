@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)http://127.0.0.1:5500/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPR Navigation Chatbot</title>
+  <link rel="stylesheet" href="./14_files/leaflet.css">
+  <script src="./14_files/leaflet.js.download"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: linear-gradient(to right, #e3f2fd, #fff);
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h2 {
+      color: #007bff;
+      margin: 0;
+    }
+
+    .chat-box {
+      background: #fff;
+      width: 100%;
+      max-width: 600px;
+      height: 250px;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-box .bot-message,
+    .chat-box .user-message {
+      margin: 8px 0;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 85%;
+      white-space: pre-line;
+    }
+
+    .bot-message {
+      background: #d9f1ff;
+      align-self: flex-start;
+      color: #005080;
+    }
+    .bot-message.typing::after {
+  content: " ⏳ Thinking...";
+  font-style: italic;
+  opacity: 0.8;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.2; }
+}
+
+
+    .user-message {
+      background: #d1ffd7;
+      align-self: flex-end;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .input-area {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 22px;
+      background: #007bff;
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #map {
+      width: 100%;
+      height: 600px;
+      margin-top: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 600px) {
+  .input-area {
+    flex-direction: column;
+  }
+  input[type="text"], button {
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h2>🤖 NaviGate </h2>
+    <p>Ask something like "canteen to temple" to begin navigation!</p>
+  </header>
+
+  <div class="chat-box" id="chat-box">
+    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I’ll show you the way.</div>
+  </div>
+
+  <form class="input-area" onsubmit="sendMessage(event)">
+    <input type="text" id="user-input" placeholder="Where do you want to go?" required="">
+    <button type="submit">Send</button>
+  </form>
+
+  <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"></div><div class="leaflet-pane leaflet-overlay-pane"><img class="leaflet-image-layer leaflet-zoom-animated" src="./14_files/blue.jpg" alt="" style="z-index: 1; transform: translate3d(303px, 108px, 0px); width: 394px; height: 384px;"><svg pointer-events="none" class="leaflet-zoom-animated" width="1200" height="720" viewBox="-100 -60 1200 720" style="transform: translate3d(-100px, -60px, 0px);"><g><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M567,317a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M537,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M437,152a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M612,257a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M447,407a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M497,422a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M497,322a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M527,222a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M537,177a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M502,352a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M487,182a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M525,167a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M577,202a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M652,212a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M652,222a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M587,167a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M572,237a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M457,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,272a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M372,292a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M612,282a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M392,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path></g></svg></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(197px, -192px, 0px) scale(0.25);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="http://127.0.0.1:5500/index.html#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out leaflet-disabled" href="http://127.0.0.1:5500/index.html#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="true"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com/" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a></div></div></div></div>
+</div>
+
+<script>
+  const imageWidth = 788;
+  const imageHeight = 768;
+
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -1
+  });
+
+  const bounds = [[0, 0], [imageHeight, imageWidth]];
+  const image = L.imageOverlay('blue.jpg', bounds).addTo(map);
+  map.fitBounds(bounds);
+
+  const locations = {
+    "volleyballcourt": [350, 540],
+    "nprcet mainblock": [460, 480],
+    "ep lab": [460, 360],
+    "busshed,transportdepartment": [680, 280],
+    "girlshostel": [470, 630],
+    "toilet": [170, 300],
+    "npr artsblock1": [140, 400],
+    "medicalcenter,store,sportsroom": [340, 400],
+    "handballground": [540, 460],
+    "hillblock1": [630, 480],
+    "canteen": [280, 410],
+    "mountain": [620, 380],
+    "hillblock2": [650, 455],
+    "openauditorium": [580, 560],
+    "guesthouse": [560, 710],
+    "mess": [540, 710],
+    "footballfield": [650, 580],
+    "nprcet rearblock": [510, 550],
+    "projectroom": [460, 320],
+    "eplab": [460, 360],
+    "r&d cell": [440, 360],
+    "npr auditoriumblock": [400, 150],
+    "lawn": [420, 630],
+    "lab": [460, 190]
+  };
+
+  // Show clickable points
+  for (const name in locations) {
+    L.circleMarker(locations[name], {
+      radius: 6,
+      color: 'blue',
+      fillColor: 'cyan',
+      fillOpacity: 0.9
+    }).addTo(map).bindPopup(name.toUpperCase());
+  }
+
+  const predefinedRoutes = {
+    "canteen to girlshostel": ["canteen", [510, 620], "girlshostel"],
+    "volleyballcourt to nprcet mainblock": ["volleyballcourt", [400, 520], [430, 500], "nprcet mainblock"],
+    "eplab to busshed,transportdepartment": ["ep lab", [500, 340], [600, 300], "busshed,transportdepartment"],
+    "toilet to npr artsblock1": ["toilet", [150, 340], [140, 370], "npr artsblock1"],
+    "medicalcenter,store,sportsroom to handballground": ["medicalcenter,store,sportsroom", [400, 420], [470, 440], "handballground"],
+    "girlshostel to hillblock1": ["girlshostel", [500, 620], [570, 540], [610, 500], "hillblock1"],
+    "hillblock1 to busshed,transportdepartment": ["hillblock1", [650, 460], [670, 380], "busshed,transportdepartment"],
+    "volleyballcourt to toilet": ["volleyballcourt", [320, 500], [260, 430], [200, 350], "toilet"],
+    "npr artsblock1 to eplab": ["npr artsblock1", [150, 430], [220, 460], [300, 440], [380, 420], [440, 380], "ep lab"],
+    "nprcet mainblock to medicalcenter,store,sportsroom": ["nprcet mainblock", [420, 470], [400, 440], [370, 420], "medicalcenter,store,sportsroom"],
+    "handballground to canteen": ["handballground", [530, 500], [520, 540], "canteen"],
+    "nprcet mainblock to girlshostel": ["nprcet mainblock", [480, 520], [490, 580], [480, 610], "girlshostel"]
+  };
+
+  const routeDescriptions = {
+    "canteen to girlshostel": "Start at the canteen, move down past the NPRCET rear block, and follow the road until you reach the girl's hostel.",
+    "volleyballcourt to nprcet mainblock": "From the volleyball court, head diagonally northeast, follow the curved road, and reach the NPRCET main block.",
+    "eplab to busshed,transportdepartment": "From the EP lab, move right through the internal roads, turn left near the R&D cell, and proceed straight to the bus shed and transport department.",
+    "toilet to npr artsblock1": "Exit the toilet area heading south, curve around the junction, and you'll reach the NPR Arts Block 1.",
+    "medicalcenter,store,sportsroom to handballground": "Start at the medical center/store/sportsroom area, follow the road eastward, and you'll arrive at the handball ground.",
+    "girlshostel to hillblock1": "Leave the girl's hostel heading north, pass through the curved lane, and you'll find Hill Block 1 nearby.",
+    "hillblock1 to busshed,transportdepartment": "From Hill Block 1, take the northeast road, curve around the mountain path, and head directly to the bus shed and transport department.",
+    "volleyballcourt to toilet": "From the volleyball court, take the southern curved road past the inner campus, and follow signs to the toilet area.",
+    "npr artsblock1 to eplab": "Start at NPR Arts Block 1, follow the curved path northeast, passing the sportsroom, and continue to the EP lab.",
+    "nprcet mainblock to medicalcenter,store,sportsroom": "Leave the main block heading south, curve left at the junction, and you'll reach the medical center, store, and sports room.",
+    "handballground to canteen": "From the handball ground, go down along the right path, pass the open space, and arrive at the canteen.",
+    "nprcet mainblock to girlshostel": "Exit the main block heading south, follow the winding path, and reach the girl's hostel through the rear block."
+  };
+
+  let lastRoute = null;
+
+  function normalize(text) {
+    return text.toLowerCase().replace(/\s+/g, '');
+  }
+
+  function sendMessage(event) {
+  event.preventDefault();
+  const input = document.getElementById("user-input");
+  const chatBox = document.getElementById("chat-box");
+  const userText = input.value.trim();
+
+  if (!userText) return;
+
+  // User Message
+  const userMessage = document.createElement("div");
+  userMessage.className = "user-message";
+  userMessage.textContent = userText;
+  chatBox.appendChild(userMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // Bot Typing Indicator
+  const typingMessage = document.createElement("div");
+  typingMessage.className = "bot-message typing";
+  typingMessage.id = "typing-indicator";
+  typingMessage.textContent = "Typing...";
+  chatBox.appendChild(typingMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  input.value = "";
+
+  // Simulate bot thinking
+  setTimeout(() => {
+    typingMessage.remove();
+
+    const normalizedInput = normalize(userText);
+    let match = null;
+    for (const key in predefinedRoutes) {
+      if (normalizedInput.includes(normalize(key))) {
+        match = key;
+        break;
+      }
+    }
+
+    let botReplyText = "Sorry, I couldn't find that route.";
+    if (match) {
+      const route = predefinedRoutes[match];
+      const coords = route.map(point => typeof point === "string" ? locations[point] : point);
+      drawRouteVia(coords);
+      const routeDescription = routeDescriptions[match] || "Follow the red dashed path.";
+      botReplyText = `From ${route[0].toUpperCase()} to ${route.at(-1).toUpperCase()}: follow the red dashed path.\nRoute Description: ${routeDescription}`;
+    }
+
+    typeBotResponse(botReplyText);
+  }, 1000);
+}
+
+
+  function drawRouteVia(points) {
+    if (lastRoute) map.removeLayer(lastRoute);
+    lastRoute = L.polyline(points, {
+      color: 'red',
+      weight: 4,
+      dashArray: '8, 6'
+    }).addTo(map);
+  }
+
+  map.on('click', function (e) {
+    alert(`Clicked at: [${Math.floor(e.latlng.lat)}, ${Math.floor(e.latlng.lng)}]`);
+  });
+
+
+function typeBotResponse(text) {
+  const chatBox = document.getElementById("chat-box");
+  const botMessage = document.createElement("div");
+  botMessage.className = "bot-message";
+  chatBox.appendChild(botMessage);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  let index = 0;
+  function typeChar() {
+    if (index < text.length) {
+      botMessage.textContent += text.charAt(index++);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(typeChar, 20); // Typing speed
+    }
+  }
+  typeChar();
+}
+
+  
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+
+</body></html>
