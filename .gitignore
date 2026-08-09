@@ -1,11 +1,3 @@
-# Images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-*.svg
-
 # Documents
 *.pdf
 *.doc
