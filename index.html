@@ -7,61 +7,86 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: linear-gradient(to right, #e3f2fd, #fff);
-      color: #333;
-    }
+    * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      max-width: 1000px;
-      margin: auto;
-    }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f8fc;
+  color: #333;
+  min-height: 100vh;
+}
 
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  max-width: 1000px;
+  margin: auto;
+}
 
-    header h2 {
-      color: #007bff;
-      margin: 0;
-    }
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .chat-box {
-      background: #fff;
-      width: 100%;
-      max-width: 600px;
-      height: 250px;
-      border-radius: 15px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      padding: 15px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-    }
+header h1 {
+  margin-bottom: 8px;
+  font-size: 32px;
+  color: #222;
+}
 
-    .chat-box .bot-message,
-    .chat-box .user-message {
-      margin: 8px 0;
-      padding: 10px 15px;
-      border-radius: 20px;
-      max-width: 85%;
-      white-space: pre-line;
-    }
+header h2 {
+  color: #007bff;
+  margin: 0;
+}
 
-    .bot-message {
-      background: #d9f1ff;
-      align-self: flex-start;
-      color: #005080;
-    }
-    .bot-message.typing::after {
+header p {
+  margin-top: 8px;
+  color: #666;
+  font-size: 15px;
+}
+
+/* Chat Box */
+.chat-box {
+  background: #fff;
+  width: 100%;
+  max-width: 600px;
+  height: 250px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat Messages */
+.chat-box .bot-message,
+.chat-box .user-message {
+  margin: 8px 0;
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 85%;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+/* Bot Message */
+.bot-message {
+  background: #d9f1ff;
+  align-self: flex-start;
+  color: #005080;
+}
+
+/* Typing Animation */
+.bot-message.typing::after {
   content: " ⏳ Thinking...";
   font-style: italic;
   opacity: 0.8;
@@ -69,61 +94,192 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
 }
 
+/* User Message */
+.user-message {
+  background: #d1ffd7;
+  align-self: flex-end;
+  font-weight: bold;
+  text-align: right;
+  color: #155724;
+}
 
-    .user-message {
-      background: #d1ffd7;
-      align-self: flex-end;
-      font-weight: bold;
-      text-align: right;
-    }
+/* Input Area */
+.input-area {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+}
 
-    .input-area {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 600px;
-    }
+/* Text Input */
+input[type="text"] {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s;
+}
 
-    input[type="text"] {
-      flex: 1;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
+input[type="text"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
 
-    button {
-      padding: 12px 22px;
-      background: #007bff;
-      border: none;
-      border-radius: 30px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+/* Button */
+button {
+  padding: 12px 22px;
+  background: #007bff;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-    button:hover {
-      background: #0056b3;
-    }
+button:hover {
+  background: #0056b3;
+}
 
-    #map {
-      width: 100%;
-      height: 600px;
-      margin-top: 25px;
-      border-radius: 15px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-    @media (max-width: 600px) {
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+/* Map */
+#map {
+  width: 100%;
+  height: 600px;
+  margin-top: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Leaflet Map */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar {
+  width: 7px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  header h1 {
+    font-size: 26px;
+  }
+
+  header h2 {
+    font-size: 22px;
+  }
+
+  .chat-box {
+    height: 300px;
+  }
+
+  #map {
+    height: 450px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 15px;
+  }
+
+  header h1 {
+    font-size: 23px;
+  }
+
+  header h2 {
+    font-size: 19px;
+  }
+
+  header p {
+    font-size: 14px;
+  }
+
   .input-area {
     flex-direction: column;
   }
-  input[type="text"], button {
+
+  input[type="text"],
+  button {
     width: 100%;
+  }
+
+  .chat-box {
+    height: 280px;
+    padding: 10px;
+  }
+
+  .chat-box .bot-message,
+  .chat-box .user-message {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  #map {
+    height: 400px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 10px;
+  }
+
+  header h1 {
+    font-size: 20px;
+  }
+
+  header h2 {
+    font-size: 17px;
+  }
+
+  .chat-box {
+    height: 250px;
+  }
+
+  #map {
+    height: 350px;
   }
 }
   </style>
