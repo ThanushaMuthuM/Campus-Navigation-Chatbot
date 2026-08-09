@@ -1,67 +1,92 @@
 <!DOCTYPE html>
-<!-- saved from url=(0032)http://127.0.0.1:5500/index.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NPR Navigation Chatbot</title>
-  <link rel="stylesheet" href="./14_files/leaflet.css">
-  <script src="./14_files/leaflet.js.download"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: linear-gradient(to right, #e3f2fd, #fff);
-      color: #333;
-    }
+    * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      max-width: 1000px;
-      margin: auto;
-    }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f8fc;
+  color: #333;
+  min-height: 100vh;
+}
 
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  max-width: 1000px;
+  margin: auto;
+}
 
-    header h2 {
-      color: #007bff;
-      margin: 0;
-    }
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .chat-box {
-      background: #fff;
-      width: 100%;
-      max-width: 600px;
-      height: 250px;
-      border-radius: 15px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      padding: 15px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-    }
+header h1 {
+  margin-bottom: 8px;
+  font-size: 32px;
+  color: #222;
+}
 
-    .chat-box .bot-message,
-    .chat-box .user-message {
-      margin: 8px 0;
-      padding: 10px 15px;
-      border-radius: 20px;
-      max-width: 85%;
-      white-space: pre-line;
-    }
+header h2 {
+  color: #007bff;
+  margin: 0;
+}
 
-    .bot-message {
-      background: #d9f1ff;
-      align-self: flex-start;
-      color: #005080;
-    }
-    .bot-message.typing::after {
+header p {
+  margin-top: 8px;
+  color: #666;
+  font-size: 15px;
+}
+
+/* Chat Box */
+.chat-box {
+  background: #fff;
+  width: 100%;
+  max-width: 600px;
+  height: 250px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat Messages */
+.chat-box .bot-message,
+.chat-box .user-message {
+  margin: 8px 0;
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 85%;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+/* Bot Message */
+.bot-message {
+  background: #d9f1ff;
+  align-self: flex-start;
+  color: #005080;
+}
+
+/* Typing Animation */
+.bot-message.typing::after {
   content: " ⏳ Thinking...";
   font-style: italic;
   opacity: 0.8;
@@ -69,61 +94,192 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
 }
 
+/* User Message */
+.user-message {
+  background: #d1ffd7;
+  align-self: flex-end;
+  font-weight: bold;
+  text-align: right;
+  color: #155724;
+}
 
-    .user-message {
-      background: #d1ffd7;
-      align-self: flex-end;
-      font-weight: bold;
-      text-align: right;
-    }
+/* Input Area */
+.input-area {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+}
 
-    .input-area {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 600px;
-    }
+/* Text Input */
+input[type="text"] {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s;
+}
 
-    input[type="text"] {
-      flex: 1;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
+input[type="text"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
 
-    button {
-      padding: 12px 22px;
-      background: #007bff;
-      border: none;
-      border-radius: 30px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+/* Button */
+button {
+  padding: 12px 22px;
+  background: #007bff;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-    button:hover {
-      background: #0056b3;
-    }
+button:hover {
+  background: #0056b3;
+}
 
-    #map {
-      width: 100%;
-      height: 600px;
-      margin-top: 25px;
-      border-radius: 15px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-    @media (max-width: 600px) {
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+/* Map */
+#map {
+  width: 100%;
+  height: 600px;
+  margin-top: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Leaflet Map */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+}
+
+/* Scrollbar */
+.chat-box::-webkit-scrollbar {
+  width: 7px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  header h1 {
+    font-size: 26px;
+  }
+
+  header h2 {
+    font-size: 22px;
+  }
+
+  .chat-box {
+    height: 300px;
+  }
+
+  #map {
+    height: 450px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 15px;
+  }
+
+  header h1 {
+    font-size: 23px;
+  }
+
+  header h2 {
+    font-size: 19px;
+  }
+
+  header p {
+    font-size: 14px;
+  }
+
   .input-area {
     flex-direction: column;
   }
-  input[type="text"], button {
+
+  input[type="text"],
+  button {
     width: 100%;
+  }
+
+  .chat-box {
+    height: 280px;
+    padding: 10px;
+  }
+
+  .chat-box .bot-message,
+  .chat-box .user-message {
+    max-width: 90%;
+    font-size: 14px;
+  }
+
+  #map {
+    height: 400px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 10px;
+  }
+
+  header h1 {
+    font-size: 20px;
+  }
+
+  header h2 {
+    font-size: 17px;
+  }
+
+  .chat-box {
+    height: 250px;
+  }
+
+  #map {
+    height: 350px;
   }
 }
   </style>
@@ -136,15 +292,15 @@
   </header>
 
   <div class="chat-box" id="chat-box">
-    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I’ll show you the way.</div>
+    <div class="bot-message">Welcome! 🌟 Enter a route like "library to mess" and I'll show you the way.</div>
   </div>
 
   <form class="input-area" onsubmit="sendMessage(event)">
-    <input type="text" id="user-input" placeholder="Where do you want to go?" required="">
+    <input type="text" id="user-input" placeholder="Where do you want to go?" required />
     <button type="submit">Send</button>
   </form>
 
-  <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"></div><div class="leaflet-pane leaflet-overlay-pane"><img class="leaflet-image-layer leaflet-zoom-animated" src="./14_files/blue.jpg" alt="" style="z-index: 1; transform: translate3d(303px, 108px, 0px); width: 394px; height: 384px;"><svg pointer-events="none" class="leaflet-zoom-animated" width="1200" height="720" viewBox="-100 -60 1200 720" style="transform: translate3d(-100px, -60px, 0px);"><g><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M567,317a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M537,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M437,152a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M612,257a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M447,407a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M497,422a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M497,322a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M527,222a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M537,177a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M502,352a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M487,182a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M525,167a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M577,202a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M652,212a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M652,222a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M587,167a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M572,237a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M457,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M477,272a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M372,292a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M612,282a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="blue" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="cyan" fill-opacity="0.9" fill-rule="evenodd" d="M392,262a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path></g></svg></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(197px, -192px, 0px) scale(0.25);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="http://127.0.0.1:5500/index.html#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out leaflet-disabled" href="http://127.0.0.1:5500/index.html#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="true"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com/" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a></div></div></div></div>
+  <div id="map"></div>
 </div>
 
 <script>
@@ -157,7 +313,8 @@
   });
 
   const bounds = [[0, 0], [imageHeight, imageWidth]];
-  const image = L.imageOverlay('blue.jpg', bounds).addTo(map);
+  // ✅ FIXED: Image path now points to 14_files folder
+  const image = L.imageOverlay('./14_files/blue.jpg', bounds).addTo(map);
   map.fitBounds(bounds);
 
   const locations = {
@@ -311,7 +468,7 @@ function typeBotResponse(text) {
     if (index < text.length) {
       botMessage.textContent += text.charAt(index++);
       chatBox.scrollTop = chatBox.scrollHeight;
-      setTimeout(typeChar, 20); // Typing speed
+      setTimeout(typeChar, 20);
     }
   }
   typeChar();
@@ -319,44 +476,5 @@ function typeBotResponse(text) {
 
   
 </script>
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
-</script>
-
-
-</body></html>
+</body>
+</html>
