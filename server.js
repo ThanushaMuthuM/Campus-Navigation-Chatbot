@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const OpenAI = require('openai');
+const path = require('path');
 
 dotenv.config();
 
@@ -9,9 +10,15 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
+
+app.use(express.static(__dirname));
+
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/ask', async (req, res) => {
@@ -34,28 +41,7 @@ You are a campus route assistant for NPR Group of Institutions, Natham, Dindigul
 
 Only answer queries related to routes and directions between locations on campus.
 
-You can help users with:
-- Finding buildings
-- Finding departments
-- Finding classrooms
-- Finding laboratories
-- Finding offices
-- Finding hostels
-- Finding canteens
-- Finding libraries
-- Finding campus facilities
-- Giving directions between campus locations
-
-Do not answer questions about:
-- Admissions
-- Fees
-- Faculty
-- Exams
-- College administration
-- General topics
-- Unrelated questions
-
-If the question is unrelated to campus navigation, politely say that you can only help with campus routes and directions.
+Do not answer admissions, fees, faculty, exams, or unrelated general questions.
                     `
                 },
                 {
@@ -65,15 +51,15 @@ If the question is unrelated to campus navigation, politely say that you can onl
             ]
         });
 
-        const reply = completion.choices[0].message.content;
-
-        res.json({ reply });
+        res.json({
+            reply: completion.choices[0].message.content
+        });
 
     } catch (error) {
         console.error('OpenAI Error:', error.message);
 
         res.status(500).json({
-            error: 'Something went wrong while processing your request.'
+            error: 'Something went wrong.'
         });
     }
 });
